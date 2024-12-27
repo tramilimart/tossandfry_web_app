@@ -1,0 +1,9 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+	<title>icon_google-svg</title>
+	<defs>
+		<image  width="36" height="25" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAZCAMAAABuOnzZAAAAAXNSR0IB2cksfwAAAGlQTFRFNzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3XIP5hwAAACN0Uk5TALT/8AH4RFSocMDkaOAYvFjsIExkNIxQFKC41MyUYMgs9NCTRaV3AAAA4ElEQVR4nI3TaU8CMRCA4bcLBBBEORRRIoH//6MQEm4VEEQXGVj2gA3bVvqlxzxpk5mpAqWwDbXjCBwrcv5Qma1diRdWjj9ZDR6yqSB0RGYVBnxkUtFxgEi7pPYmEyEyv+RcgzkhshtufvTmjMivKX6fSOGL0ooE4nbB/TJc331SmaNBsRfK79Q+0KNIVac8zjCgh/F57RiQ8DSRQNSHcRVDwvPImxpqEOwKmwR66V9URpMnTfWavYuMC60+iSFhQX1Umf3fKkJatAZeu2HTCe03g/Evy7nX/RbodK3Iq/UBESNBRGnh9JYAAAAASUVORK5CYII="/>
+	</defs>
+	<style>
+	</style>
+	<use id="Layer 1" href="#img1" x="6" y="12"/>
+</svg>
