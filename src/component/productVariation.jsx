@@ -33,11 +33,11 @@ const fetchVariation = async (id) => {
         return { docData: null, listData: [] };
     }
 };
-const ComponentName = ({ variation_id, qty_pcs, onSelectionChange }) => {
+const ComponentName = ({ variation_id, qty_pcs, selectedVariation, onSelectionChange }) => {
     const [isFetching, setIsFetching] = useState(false);
     const [checkableType, setCheckableType] = useState(null);
     const [selectLimit, setSelectLimit] = useState(null);
-    const [selectedItems, setSelectedItems] = useState([]);
+    const [selectedItems, setSelectedItems] = useState(selectedVariation?.[variation_id] || []);
 
     const { data: variation, isLoading: isVariationLoading } = useQuery({
         queryKey: [`${variation_id}`],
@@ -47,10 +47,7 @@ const ComponentName = ({ variation_id, qty_pcs, onSelectionChange }) => {
 
     useEffect(() => {
         if (variation) {
-            console.log('variation', variation);
-            console.log('qty_pcs', qty_pcs);
             const limit = variation.docData.limit[qty_pcs];
-            console.log(`${variation_id}_limit = ${limit}`);
             setSelectLimit(limit);
             const checkableType = limit > 1 ? 'checkbox' : 'radio';
             setCheckableType(checkableType);
@@ -115,7 +112,10 @@ const ComponentName = ({ variation_id, qty_pcs, onSelectionChange }) => {
                                             type={checkableType} // "checkbox" or "radio"
                                             name={variation_id} // Shared name for radio buttons
                                             value={item.name}
-                                            checked={selectedItems.includes(item.name)}
+                                            checked={
+                                              selectedItems.includes(item.name) || 
+                                              (selectedVariation?.[variation_id]?.includes(item.name) || false) // Safely check
+                                            }
                                             onChange={(event) => handleChange(event, item.name)}
                                         />
                                         {item.is_available ? item.name : item.name + (' (Not Available)')}

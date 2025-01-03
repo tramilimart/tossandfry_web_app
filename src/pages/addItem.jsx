@@ -19,6 +19,9 @@ const ComponentName = () => {
         : 1);
     const [isFetching, setIsFetching] = useState(false);
     const [variationSelections, setVariationSelections] = useState({});
+    const selectedItem = cart.find(item => item.id === productDetails.id);
+    const selectedVariation = selectedItem?.variation;
+    
 
     const handleVariationChange = (variationId, selectedItems) => {
         setVariationSelections(prev => ({
@@ -26,10 +29,23 @@ const ComponentName = () => {
             [variationId]: selectedItems
         }));
 
-        console.log('All variations selections:', {
-            ...variationSelections,
-            [variationId]: selectedItems
-        });
+        // Check if the item already exists in the cart by matching the id
+        const itemExists = cart.some(cartItem => cartItem.id === productDetails.id);
+        if (itemExists) {
+            console.log(`${productDetails.id} already exists in the cart!`);
+
+            // If the item exists, update its quantity and totalAmount in the cart
+            const updatedCart = cart.map(cartItem => {
+                if (cartItem.id === productDetails.id) {
+                    // Update the item's variation
+                    cartItem.variation[variationId] = selectedItems
+                }
+                return cartItem;
+            });
+
+            // Update the cart with the new values
+            addCart(updatedCart);
+        }
     };
     // To get all selections
     useEffect(() => {
@@ -149,6 +165,7 @@ const ComponentName = () => {
                                     key={item.id || index}
                                     variation_id={item}
                                     qty_pcs={productDetails.qty_pcs}
+                                    selectedVariation={selectedVariation}
                                     onSelectionChange={(selectedItems) => handleVariationChange(item, selectedItems)}
                                 />
                             ))}

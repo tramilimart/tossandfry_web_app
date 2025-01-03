@@ -280,7 +280,12 @@ export const sendImageToAPI = async (imageBlob) => {
       console.error('Error sending image to API:', error);
     }
 };
-
+export const formatWord = (word) => {
+    return word
+      .split('_') // Split the word into parts by underscore
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1)) // Capitalize the first letter of each part
+      .join(' '); // Join the parts back with spaces
+  }
 export const generateRandomCode = () => {
     // Generate a random number between 10000 and 99999
     const randomCode = Math.floor(10000 + Math.random() * 90000);
