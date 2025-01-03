@@ -155,15 +155,19 @@ export const checkVerificationCode = async (doc_id, code) => {
   }
 }
 
-export const fetchServices = async () => {
+export const fetchProducts = async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, "services"), orderBy('gross_premium', 'desc'));
-    const services = [];
+    const q = query(
+      collection(db, "product_category"), 
+      orderBy('date_added', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    const products = [];
     querySnapshot.forEach((doc) => {
-      services.push({ id: doc.id, ...doc.data() });
+      products.push({ id: doc.id, ...doc.data() });
     });
-    //console.log("===========>>fetchServices data:", services);
-    return services;
+    console.log("===========>>fetchServices data:", products);
+    return products;
   } catch (error) {
     console.error("[firebaseUtils] [fetchServices] Error fetching data: ", error);
     return null;
@@ -435,4 +439,49 @@ export const updatePolicyDetailsColumn = async (uid, columnToUpdate) => {
     console.error('Error updating verification code:', error);
     return { isSuccess: false, message: 'Failed to update verification code: ' + error.message };
   }
+};
+
+export const fetchProduct = async (id) => {
+    try {
+        const docRef = doc(db, "products", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return docSnap.data();
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching store status:", error);
+        return null;
+    }
+};
+
+export const fetchVariation = async (id) => {
+    try {
+        // Reference to the main document
+        const docRef = doc(db, "product_variation", id);
+        // Reference to the `list` subcollection
+        const listRef = collection(db, "product_variation", id, "list");
+
+        // Fetch the document and subcollection data concurrently
+        const [docSnap, listSnapshot] = await Promise.all([
+            getDoc(docRef), // Fetch the main document
+            getDocs(listRef), // Fetch the subcollection
+        ]);
+
+        // Get document data
+        const docData = docSnap.exists() ? docSnap.data() : null;
+
+        // Map over subcollection documents
+        const listData = listSnapshot.docs.map((doc) => ({
+            id: doc.id, // Include the document ID
+            ...doc.data(),
+        }));
+
+        // Return both document data and subcollection data
+        return { docData, listData };
+    } catch (error) {
+        console.error("Error fetching variation data:", error);
+        return { docData: null, listData: [] };
+    }
 };

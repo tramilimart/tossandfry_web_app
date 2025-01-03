@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../utils/firebaseConnect';
 import OkCancelModal from '../modals/okCancelModal';
+import StoreStatus from "../../component/home/storeStatus";
 
 function Component({ displayName, photo_url }) {
     const navigate = useNavigate();
@@ -45,17 +46,15 @@ function Component({ displayName, photo_url }) {
         <>
             <OkCancelModal onClose={closeOkCancelModal} onSave={setSelectedConfirmation} title='Confirm Sign Out' message='Do you want to sign out your account?' />
 
-            <div className="home-top-bg">
-                <div className="user-info-div">
-                    <div className="user-info">
-                        {photo_url ?
-                            (<img src={photo_url} alt="User Profile" />) :
-                            (<img src={generateProfile(displayName)} alt="Default Profile" />)}
-                        {displayName ?
-                            (<span>Hi, {displayName.split(' ')[0]}</span>) :
-                            (<span>Hi, Agent</span>)}
-                    </div>
-                    <i className="bi bi-power fs-3 cur-p" onClick={handleLogout}></i>
+            <div className="user-info-container">
+                <i className="bi bi-list fs-2 cur-p" onClick={handleLogout}></i>
+                <div className="user-info">
+                    {displayName ?
+                        (<span>Hi, {displayName.split(' ')[0]}</span>) :
+                        (<span>Hi, Welcome!</span>)}
+                    {photo_url ?
+                        (<img src={photo_url} alt="User Profile" onClick={handleLogout}/>) :
+                        (<img src={generateProfile(displayName ? displayName : 'Welcome')} alt="Default Profile" />)}
                 </div>
             </div>
         </>

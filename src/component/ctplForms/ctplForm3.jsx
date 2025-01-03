@@ -6,7 +6,7 @@ import { insertPolicyDetails, updatePolicyDetails, updatePolicyStatusById } from
 import { addCover } from '../../store/coverSlice.jsx';
 import { addAssured } from '../../store/assuredSlice.jsx';
 import { addStatus } from '../../store/statusSlice.jsx';
-import AgentContext from '../../utils/agentContext.jsx';
+import AgentContext from '../../utils/appContext.jsx';
 import ToastContext from '../../utils/toastContext.jsx';
 import CtplStatusBar from './ctplStatusBar.jsx';
 import useClearLocalStorage from '../../utils/clearStorage.js'; 

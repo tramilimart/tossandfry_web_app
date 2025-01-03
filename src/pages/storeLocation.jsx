@@ -1,16 +1,36 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { collection, getDoc, doc, query, where } from "firebase/firestore";
+import { db } from '../utils/firebaseConnect.js';
+import { useQuery } from '@tanstack/react-query';
 import WakeLockComponent from '../component/wakeLock.jsx';
-import destination_ico from '../assets/destination_ico.png';
+import destination_ico from '../assets/store_ico.jpg';
 import rider_ico from '../assets/rider_ico.png';
 
+const fetchStoreLongLat = async () => {
+  try {
+    const docRef = doc(db, "store_settings", "parameters");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const storeLongLat = docSnap.data().store_long_lat;
+      return storeLongLat;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching store status:", error);
+    return null;
+  }
+};
+
 const LocationTracker = () => {
+  const [isFetching, setIsFetching] = useState(false);
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
   const destinationMarkerRef = useRef(null);
   const polylineRef = useRef(null);
   const isInitializedRef = useRef(false);
-  const polylinesRef = useRef([]); // Array to store multiple route polylines
+  const polylinesRef = useRef([]);
 
   const [location, setLocation] = useState({
     latitude: 0,
@@ -29,6 +49,12 @@ const LocationTracker = () => {
   const [requestCounter, setRequestCounter] = useState(0);
   const [distance, setDistance] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+
+  const { data: storeLongLat, isQueryLoading } = useQuery({
+    queryKey: ['store_long_lat'],
+    queryFn: () => fetchStoreLongLat(),
+  });
 
   const initializeMap = useCallback(async () => {
     
@@ -72,18 +98,7 @@ const LocationTracker = () => {
         ],
       });
 
-      // Set bicycle icon as a marker
-      const bicycleIcon = {
-        url: rider_ico, 
-        scaledSize: new window.google.maps.Size(50, 50),
-      };
-      // Add the marker to the map
       const marker = new Marker({
-        map,
-        icon: bicycleIcon,
-      });
-
-      /*const marker = new Marker({
         map,
         icon: {
           path: SymbolPath.CIRCLE,
@@ -93,7 +108,7 @@ const LocationTracker = () => {
           strokeColor: 'white',
           strokeWeight: 2,
         }
-      });*/
+      });
 
       const polyline = new Polyline({
         map,
@@ -148,14 +163,14 @@ const updateMap = useCallback(async (newLat, newLng) => {
       });
 
       // Create polylines for each route with different colors
-      const colors = ['#4285F4', '#0F9D58', '#DB4437']; // Google colors
+      const colors = ['#DB4437','#4285F4', '#0F9D58']; // Google colors
       
       result.routes.forEach((route, index) => {
         const polyline = new window.google.maps.Polyline({
           map: mapInstanceRef.current,
           path: route.overview_path,
           strokeColor: colors[index % colors.length],
-          strokeOpacity: 0.8,
+          strokeOpacity: 1,
           strokeWeight: 5
         });
 
@@ -194,30 +209,21 @@ const updateMap = useCallback(async (newLat, newLng) => {
   }
 }, [location, destination, setError]);
 
-  const handleDestinationSearch = useCallback(async () => {
-    if (!window.google || !searchInput) return;
-
+  const handleDestination = useCallback(async () => {
     try {
-      const geocoder = new window.google.maps.Geocoder();
+      const location = {
+        lat: parseFloat(storeLongLat.split(',')[0]),
+        lng: parseFloat(storeLongLat.split(',')[1]),
+      };
+      const newDestination = {
+        latitude: location.lat,
+        longitude: location.lng,
+        address: 'Toss And Fry'
+      };
+
+      console.log('here');
       
-      const results = await new Promise((resolve, reject) => {
-        geocoder.geocode({ address: searchInput }, (results, status) => {
-          if (status === 'OK') resolve(results);
-          else reject(new Error('Location not found'));
-        });
-      });
-
-      if (results[0]) {
-        const location = results[0].geometry.location;
-        console.log('location',location);
-        const newDestination = {
-          latitude: location.lat(),
-          longitude: location.lng(),
-          address: results[0].formatted_address
-        };
-        
-        setDestination(newDestination);
-
+      setDestination(newDestination);
         if (destinationMarkerRef.current) {
           destinationMarkerRef.current.setPosition(location);
         } else {
@@ -235,11 +241,19 @@ const updateMap = useCallback(async (newLat, newLng) => {
         bounds.extend(markerRef.current.getPosition());
         bounds.extend(location);
         mapInstanceRef.current.fitBounds(bounds);
-      }
     } catch (err) {
       setError('Error searching for location');
     }
-  }, [searchInput]);
+  }, [storeLongLat]);
+
+  
+  useEffect(() => {
+    if (storeLongLat) {
+      console.log('storeLongLat', storeLongLat)
+      handleDestination();
+      setIsFetching(false);
+    }
+  }, [storeLongLat, handleDestination]);
 
   useEffect(() => {
     initializeMap();
@@ -271,17 +285,6 @@ const updateMap = useCallback(async (newLat, newLng) => {
       setRequestCounter(prev => prev + 1);
       if (isInitializedRef.current) {
             //updateMap(newLocation.latitude, newLocation.longitude);
-            // Only update if enough time passed and significant movement
-            // console.log('lastUpdate', lastUpdate);
-            // console.log('Date.now() - lastUpdate', Date.now() - lastUpdate);
-            // console.log('THROTTLE_MS', THROTTLE_MS);
-            // console.log('Date.now() - lastUpdate > THROTTLE_MS', Date.now() - lastUpdate > THROTTLE_MS);
-            // console.log('calculateDistance(lastLocation, newLocation)', calculateDistance(lastLocation, newLocation));
-            // console.log('MIN_DISTANCE', MIN_DISTANCE);
-            // console.log('calculateDistance(lastLocation, newLocation) > MIN_DISTANCE', calculateDistance(lastLocation, newLocation) > MIN_DISTANCE);
-            // console.log('Math.abs(lastHeading - location.heading)', Math.abs(lastHeading - location.heading));
-            // console.log('MIN_HEADING_CHANGE', MIN_HEADING_CHANGE);
-            // console.log('Math.abs(lastHeading - location.heading) > MIN_HEADING_CHANGE', Math.abs(lastHeading - location.heading) > MIN_HEADING_CHANGE);
             if (Date.now() - lastUpdate > THROTTLE_MS && 
                 lastLocation === null ||
                 calculateDistance(lastLocation, newLocation) > MIN_DISTANCE ||
@@ -391,9 +394,6 @@ const updateMap = useCallback(async (newLat, newLng) => {
       <WakeLockComponent />
       <div className="container py-4">
         <div className="card">
-            <div className="card-header">
-            <h5 className="card-title mb-0">Real-time Navigation Tracker</h5>
-            </div>
             { isLoading && (
             <div className="card-body text-center">
                 <div className="spinner-border text-primary" role="status">
@@ -402,36 +402,10 @@ const updateMap = useCallback(async (newLat, newLng) => {
             </div>
             )}
             <div className="card-body">
-            <div className="mb-4">
-                <div className="input-group">
-                <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter destination address"
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                />
-                <button 
-                    className="btn btn-primary" 
-                    onClick={handleDestinationSearch}
-                >
-                    Set Destination
-                </button>
-                </div>
-            </div>
 
             {error && (
                 <div className="alert alert-danger mb-4">
                 {error}
-                </div>
-            )}
-
-            {destination.address && (
-                <div className="alert alert-info mb-4">
-                <strong>Destination:</strong> {destination.address}
-                {distance && (
-                    <div><strong>Distance remaining:</strong> {distance.toFixed(2)} km</div>
-                )}
                 </div>
             )}
 
@@ -440,34 +414,6 @@ const updateMap = useCallback(async (newLat, newLng) => {
                 style={{ height: '400px', width: '100%' }} 
                 className="mb-4"
             />
-            
-            <div className="row g-4">
-                <div className="col-12 col-md-4">
-                <div className="p-3 bg-light rounded">
-                    <div className="fw-bold">Current Location</div>
-                    <div>Lat: {location.latitude.toFixed(6)}°</div>
-                    <div>Lng: {location.longitude.toFixed(6)}°</div>
-                </div>
-                </div>
-                
-                <div className="col-12 col-md-4">
-                <div className="p-3 bg-light rounded">
-                    <div className="fw-bold">Speed</div>
-                    <div>{location.speed ? `${location.speed.toFixed(2)} m/s` : 'N/A'}</div>
-                </div>
-                </div>
-                
-                <div className="col-12 col-md-4">
-                <div className="p-3 bg-light rounded">
-                    <div className="fw-bold">Heading</div>
-                    <div>{location.heading ? `${location.heading.toFixed(2)}°` : 'N/A'}</div>
-                </div>
-                </div>
-            </div>
-            
-            <div className="mt-4 text-end text-muted small">
-                Updates received: {requestCounter}
-            </div>
             </div>
         </div>
         </div>

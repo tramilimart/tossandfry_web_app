@@ -1,82 +1,76 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { auth } from './utils/firebaseConnect';
-import AgentContext, { AgentProvider } from './utils/agentContext';
-import ToastContext, { ToastProvider } from './utils/toastContext';
-import { fetchServices } from './utils/firebaseUtils';
-import store from './store/store';
+import React, { useEffect, useState, useContext } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Provider } from 'react-redux'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { auth } from './utils/firebaseConnect'
+import AgentContext, { AppProvider } from './utils/appContext'
+import ToastContext, { ToastProvider } from './utils/toastContext'
+import { fetchProducts } from './utils/firebaseUtils'
+import store from './store/store'
 
-import HomePage from './pages/home';
-import ErrorPage from './component/errorPage';
-import SignInPage from './pages/signIn';
-import Registration from './pages/registration';
-import VerifyCode from './pages/verifyCode';
-import ForgotPassword from './pages/forgotPassword';
-import UpdatePassword from './pages/updatePassword';
-import Ctpl from './pages/ctpl';
-import ScanImage from './pages//scanImage';
-import Drafts from './pages/draft';
-import Sent from './pages/sent';
-import Issued from './pages/issued';
-import Renewals from './pages/renewals';
-import DraftDetails from './pages/draftDetails';
-import SentDetails from './pages/sentDetails';
-import IssuedDetails from './pages/issuedDetails';
-import ProofOfPayment from './pages/sendProofOfPayment';
-import HowToPay from './pages/howToPay';
-import MyLocation from './pages/myLocation';
+import Home from './pages/home'
+import ErrorPage from './component/errorPage'
+import SignIn from './pages/signIn';
+import Registration from './pages/registration'
+import VerifyCode from './pages/verifyCode'
+import ForgotPassword from './pages/forgotPassword'
+import UpdatePassword from './pages/updatePassword'
+import Ctpl from './pages/ctpl'
+import ScanImage from './pages//scanImage'
+import Drafts from './pages/draft'
+import Sent from './pages/sent'
+import Issued from './pages/issued'
+import Renewals from './pages/renewals'
+import DraftDetails from './pages/draftDetails'
+import SentDetails from './pages/sentDetails'
+import IssuedDetails from './pages/issuedDetails'
+import ProofOfPayment from './pages/sendProofOfPayment'
+import HowToPay from './pages/howToPay'
+import MyLocation from './pages/myLocation'
+import Category from './pages/category'
+import AddItem from './pages/addItem'
+import StoreLocation from './pages/storeLocation'
+import PrivacyPolicy from './pages/privacyPolicy'
+import DataDeletionPage from './pages/dataDeletion'
 
 const queryClient = new QueryClient();
 
 function App() {
-  const { agentContext, setAgentContext } = useContext(AgentContext);
-  const { toastContext, setToastContext } = useContext(ToastContext);
-  const [services, setServices] = useState([]);
+  const { userContext, setUserContext} = useContext(AgentContext);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Fetch services data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const servicesData = await fetchServices();
-        setServices(servicesData);
-      } catch (error) {
-        console.error('Error fetching services:', error);
-      }
-    };
-
-    fetchData();
-  }, [fetchServices]);
+  
+  const getOrCreateDeviceId = () => {
+    let deviceId = localStorage.getItem('deviceId');
+    if (!deviceId) {
+      deviceId = Array.from({ length: 15 }, () =>
+        Math.random().toString(36).charAt(2)
+      ).join('');
+      localStorage.setItem('deviceId', deviceId);
+    }
+    return deviceId;
+  };
+  getOrCreateDeviceId();
 
   // Handle authentication state change
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (user && user.emailVerified) {
-        /*if(!user.emailVerified) {
-          const uid = user.uid;
-          const email = user.email; 
-          navigate('/verify', { state: { uid, email } });
-        } else {*/
-          setAgentContext(prevState => ({
+        setUserContext(prevState => ({
             ...prevState,
-            agent: {
+            user: {
               uid: user.uid,
               name: user.displayName,
               email: user.email,
               photo_url: user.photoURL,
-            },
-            services: services //this contain no value when reloaded on other page
+            }
           }));
-          console.log('===========>>setAgentContext data');
-        //}
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [auth, setAgentContext, services]);
+  }, [auth, setUserContext, products]);
 
   if (loading) {
     return (
@@ -91,7 +85,8 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={agentContext.agent.uid ? <HomePage /> : <SignInPage />} />
+                <Route path="/" element={<Home userContext={userContext}/>} />
+                <Route path="/signin" element={<SignIn />} />
                 <Route path="/register" element={<Registration />} />
                 <Route path="/verify" element={<VerifyCode />} />
                 <Route path="/forgotPassword" element={<ForgotPassword />} />
@@ -108,6 +103,11 @@ function App() {
                 <Route path="/proof-of-payment/:policyId" element={<ProofOfPayment />} />
                 <Route path="/how-to-pay" element={<HowToPay />} />
                 <Route path="/myLocation" element={<MyLocation />} />
+                <Route path="/store-location" element={<StoreLocation />} />
+                <Route path="/category/:category" element={<Category />} />
+                <Route path="/add-item" element={<AddItem />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/data-deletion" element={<DataDeletionPage />} />
                 <Route path="*" element={<ErrorPage />} />
               </Routes>
             </BrowserRouter>
@@ -118,9 +118,9 @@ function App() {
 
 const AppWithContextProvider = () => (
   <ToastProvider>
-    <AgentProvider>
+    <AppProvider>
       <App />
-    </AgentProvider>
+    </AppProvider>
   </ToastProvider>
 );
 

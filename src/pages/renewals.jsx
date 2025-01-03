@@ -4,7 +4,7 @@ import { collection, getDocs, query, where, limit, orderBy } from "firebase/fire
 import { db } from '../utils/firebaseConnect.js';
 import { useQuery } from '@tanstack/react-query';
 import { currencyFormat } from '../utils/appUtils.js';
-import AgentContext from '../utils/agentContext.jsx';
+import AgentContext from '../utils/appContext.jsx';
 import StatusBar from '../component/statusBar.jsx'
 
 const fetchData = async (uid) => {

@@ -18,7 +18,7 @@ const GoogleButton = () => {
   };
 
   return (
-    <div className='signin-btn' onClick={handleSignIn}>
+    <div className='signin-btn google-btn' onClick={handleSignIn}>
         {loading ? <><i className='spinner-border spinner-border-sm'></i><span>Authenticating...</span></> : <><img src={GoogleIcon}/><span>Sign In with Google</span></>}
     </div>
   );

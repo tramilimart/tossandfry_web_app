@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, setLogLevel } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
@@ -29,4 +29,8 @@ window.gtag("config", firebaseConfig.measurementId, {
 	cookie_flags: "SameSite=None;Secure",
 });
 export const analytics = getAnalytics(app);
+
+// Enable Firestore logging
+//setLogLevel('debug');
+
 export { auth, db, google_provider, facebook_provider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, storage };

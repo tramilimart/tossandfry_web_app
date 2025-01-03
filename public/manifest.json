@@ -1,19 +1,19 @@
 {
-  "name": "CTPL-Agent",
-  "short_name": "CTPL-Agent",
+  "name": "Toss And Fry",
+  "short_name": "Toss And Fry",
   "start_url": ".",
   "background_color": "#F4F4F4",
   "theme_color": "#E53636",
   "display": "standalone",
   "icons": [
     {
-      "src": "/assets/ctpl_agent_ico_192x192.svg",
+      "src": "/assets/toss_and_fry_logo_192x192.jpg",
       "sizes": "192x192",
       "type": "image/svg",
       "purpose": "maskable"
     },
     {
-      "src": "/assets/ctpl_agent_ico_512x512.svg",
+      "src": "/assets/toss_and_fry_logo_512x512.jpg",
       "sizes": "512x512",
       "type": "image/svg"
     }

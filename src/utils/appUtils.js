@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import AgentContext from '../utils/agentContext.jsx';
+import AgentContext from './appContext.jsx';
 
 export const useServiceUtils = () => {
     const { agentContext } = useContext(AgentContext);
